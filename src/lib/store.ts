@@ -84,11 +84,11 @@ export const storeActions = {
     }
     persist();
   },
-  renameConversation(id: string, title: string) {
+  renameConversation(id: string, title: string, auto = false) {
     state = {
       ...state,
       conversations: state.conversations.map((c) =>
-        c.id === id ? { ...c, title, updatedAt: Date.now() } : c
+        c.id === id ? { ...c, title, titleAuto: auto || c.titleAuto, updatedAt: Date.now() } : c
       ),
     };
     persist();
