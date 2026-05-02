@@ -32,7 +32,9 @@ export function isDark() {
 
 export function subscribeTheme(fn: () => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 let inited = false;
