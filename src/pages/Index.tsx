@@ -53,7 +53,7 @@ const Index = () => {
           <Code2 className="h-4 w-4 text-muted-foreground md:hidden" />
           <h1 className="flex-1 truncate text-sm font-medium">{conv?.title ?? "AI Coder Max"}</h1>
           <span className="hidden rounded-full border bg-card px-2.5 py-0.5 text-[11px] text-muted-foreground sm:inline-block">
-            Pollinations · OpenAI
+            GPT4 · OpenAI
           </span>
         </header>
 
