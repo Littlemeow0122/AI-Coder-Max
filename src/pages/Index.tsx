@@ -5,12 +5,15 @@ import { useChat } from "@/lib/useChat";
 import { Sidebar } from "@/components/Sidebar";
 import { Composer } from "@/components/Composer";
 import { MessageBubble } from "@/components/MessageBubble";
+import { CodeCanvas } from "@/components/CodeCanvas";
+import { useCanvas } from "@/lib/canvas";
 import { cn } from "@/lib/utils";
 
 const Index = () => {
   const { conversations, activeId } = useStore();
   const conv = conversations.find((c) => c.id === activeId) ?? conversations[0];
-  const { send, stop, busy } = useChat(conv);
+  const { send, stop, retry, busy } = useChat(conv);
+  const canvas = useCanvas();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
@@ -22,12 +25,10 @@ const Index = () => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
-      {/* Desktop sidebar */}
       <div className="hidden md:flex">
         <Sidebar />
       </div>
 
-      {/* Mobile sidebar */}
       {mobileSidebar && (
         <>
           <div
@@ -40,8 +41,7 @@ const Index = () => {
         </>
       )}
 
-      <main className="flex flex-1 flex-col">
-        {/* Top bar */}
+      <main className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center gap-2 border-b border-border glass px-4 py-3">
           <button
             className="rounded-lg p-1.5 hover:bg-muted md:hidden"
@@ -57,12 +57,15 @@ const Index = () => {
           </span>
         </header>
 
-        {/* Messages */}
         <div ref={scrollRef} className={cn("flex-1 overflow-y-auto scrollbar-thin")}>
           {conv?.messages.length ? (
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6">
               {conv.messages.map((m) => (
-                <MessageBubble key={m.id} message={m} />
+                <MessageBubble
+                  key={m.id}
+                  message={m}
+                  onRetry={m.error ? () => retry(m.id) : undefined}
+                />
               ))}
             </div>
           ) : (
@@ -72,6 +75,8 @@ const Index = () => {
 
         <Composer onSend={send} onStop={stop} busy={busy} />
       </main>
+
+      {canvas && <CodeCanvas />}
     </div>
   );
 };
@@ -90,7 +95,7 @@ function EmptyState() {
       </div>
       <h2 className="mb-2 text-2xl font-semibold tracking-tight">Coder AI</h2>
       <p className="mb-8 text-sm text-muted-foreground">
-        專注於程式設計的 AI 助理 · 可上網搜尋與讀取網頁
+        專注於程式設計的 AI 助理 · 上網搜尋、讀取網頁、生成圖片、長期記憶
       </p>
       <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
         {examples.map((e) => (

@@ -33,6 +33,7 @@ export type ToolDef = {
 
 export type StreamEvent =
   | { type: "text"; delta: string }
+  | { type: "reasoning"; delta: string }
   | { type: "tool_call_start"; id: string; name: string }
   | { type: "tool_call_args"; id: string; argsDelta: string }
   | { type: "tool_call_done"; id: string; name: string; args: string }
@@ -116,6 +117,13 @@ export async function streamChat(opts: {
         if (typeof delta.content === "string" && delta.content) {
           opts.onEvent({ type: "text", delta: delta.content });
         }
+        const r =
+          (typeof delta.reasoning === "string" && delta.reasoning) ||
+          (typeof delta.reasoning_content === "string" && delta.reasoning_content) ||
+          (typeof (delta as { thinking?: string }).thinking === "string" &&
+            (delta as { thinking?: string }).thinking) ||
+          "";
+        if (r) opts.onEvent({ type: "reasoning", delta: r });
         if (Array.isArray(delta.tool_calls)) {
           for (const tc of delta.tool_calls) {
             const idx = tc.index ?? 0;
