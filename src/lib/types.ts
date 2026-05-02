@@ -58,7 +58,7 @@ export type Memory = {
 };
 
 export type ExportPayload = {
-  app: "Coder AI";
+  app: "AI Coder Max";
   version: 1;
   exportedAt: number;
   conversations: Conversation[];

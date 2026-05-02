@@ -7,7 +7,7 @@ import { streamChat, type ChatMessage, type ChatPart } from "./pollinations";
 import { TOOLS, runTool } from "./tools";
 import { memoriesAsSystemText } from "./memory";
 
-const SYSTEM_BASE = `你是 Coder AI，一位專注於程式設計與技術問題解答的 AI。
+const SYSTEM_BASE = `你是 AI Coder Max，一位專注於程式設計與技術問題解答的 AI。
 
 回應規則：
 - 使用 Markdown。完整檔案/長程式碼用三反引號 \`\`\`語言 ... \`\`\`（一定要標明語言，例如 \`\`\`tsx、\`\`\`html、\`\`\`bash）。短的行內片段用單反引號。
