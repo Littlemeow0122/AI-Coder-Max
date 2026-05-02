@@ -23,7 +23,8 @@ export function SettingsDialog({
   const [theme, setThemeState] = useState<Theme>(getTheme());
 
   useEffect(() => {
-    return subscribeTheme(() => setThemeState(getTheme()));
+    const unsub = subscribeTheme(() => setThemeState(getTheme()));
+    return () => { unsub; };
   }, []);
 
   if (!open) return null;
