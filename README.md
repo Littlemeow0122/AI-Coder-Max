@@ -1,1 +1,1 @@
-# AI Coder Pro Max
+# AI Coder Max
