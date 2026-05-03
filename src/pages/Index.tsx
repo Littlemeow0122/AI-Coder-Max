@@ -69,7 +69,14 @@ const Index = () => {
               ))}
             </div>
           ) : (
-            <EmptyState onPick={(q) => send(q, [])} />
+            <EmptyState
+              onPick={(q) =>
+                send(
+                  `${q}\n\n（這是從首頁範例觸發的請求，請完整示範你的能力：1) 先呼叫 rename_chat 為本對話命名；2) 用 web_search 搜尋與本題相關的最新資訊；3) 用 fetch_url 讀取一個相關網頁取得內容；4) 用 generate_image 生成一張與主題相符的示意圖並在回應中以 ![](url) 顯示；5) 用 save_memory 記下一條與我相關的偏好；最後用完整 Markdown 給出答案。）`,
+                  []
+                )
+              }
+            />
           )}
         </div>
 
