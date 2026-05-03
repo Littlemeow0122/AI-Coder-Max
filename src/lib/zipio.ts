@@ -6,7 +6,7 @@ export async function exportConversationsZip(
   memories: Memory[] = []
 ) {
   const payload: ExportPayload = {
-    app: "Coder AI",
+    app: "AI Coder Max",
     version: 1,
     exportedAt: Date.now(),
     conversations,
