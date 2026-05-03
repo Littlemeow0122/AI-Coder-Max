@@ -1,2 +1,3 @@
-# AI Coder Max
+# Welcome to your Lovable project
 
+TODO: Document your project here

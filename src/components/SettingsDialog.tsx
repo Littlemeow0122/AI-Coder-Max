@@ -27,7 +27,7 @@ export function SettingsDialog({
     const k = newKey.trim();
     const v = newVal.trim();
     if (!k || !v) return;
-    addMemory(`${k} : ${v}`, "user");
+    addMemory(`${k}：${v}`, "user");
     setNewKey("");
     setNewVal("");
   };
@@ -78,15 +78,15 @@ export function SettingsDialog({
               <input
                 value={newKey}
                 onChange={(e) => setNewKey(e.target.value)}
-                placeholder="名稱（例：name）"
+                placeholder="記憶名稱"
                 className="w-[38%] rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40"
                 onKeyDown={(e) => { if (e.key === "Enter") submitNew(); }}
               />
-              <span className="text-muted-foreground">:</span>
+              <span className="text-muted-foreground">：</span>
               <input
                 value={newVal}
                 onChange={(e) => setNewVal(e.target.value)}
-                placeholder="內容（例：meow）"
+                placeholder="記憶內容"
                 className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40"
                 onKeyDown={(e) => { if (e.key === "Enter") submitNew(); }}
               />

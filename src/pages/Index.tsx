@@ -53,7 +53,7 @@ const Index = () => {
           <Code2 className="h-4 w-4 text-muted-foreground md:hidden" />
           <h1 className="flex-1 truncate text-sm font-medium">{conv?.title ?? "AI Coder Max"}</h1>
           <span className="hidden rounded-full border bg-card px-2.5 py-0.5 text-[11px] text-muted-foreground sm:inline-block">
-            GPT4 · OpenAI
+            GPT4
           </span>
         </header>
 
@@ -93,7 +93,7 @@ function EmptyState() {
       <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-foreground text-background shadow-[var(--shadow-soft)]">
         <Code2 className="h-7 w-7" />
       </div>
-      <h2 className="mb-2 text-2xl font-semibold tracking-tight">AI Coder</h2>
+      <h2 className="mb-2 text-2xl font-semibold tracking-tight">AI Coder Max</h2>
       <p className="mb-8 text-sm text-muted-foreground">
         專注於程式設計的 AI 助理 · 上網搜尋、讀取網頁、生成圖片、長期記憶
       </p>

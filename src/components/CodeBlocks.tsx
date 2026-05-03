@@ -89,9 +89,6 @@ export function CanvasCodeCard({
         active && "ring-2 ring-accent/40"
       )}
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background font-mono text-[10px] uppercase">
-        {(langToExt(language) || "txt").slice(0, 4)}
-      </div>
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-medium">
           {language || "code"} · {lines} 行
