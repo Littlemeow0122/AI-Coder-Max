@@ -19,8 +19,18 @@ export function SettingsDialog({
 }) {
   const memories = useMemories();
   const [tab, setTab] = useState<"memory" | "appearance">("memory");
-  const [newMem, setNewMem] = useState("");
+  const [newKey, setNewKey] = useState("");
+  const [newVal, setNewVal] = useState("");
   const [theme, setThemeState] = useState<Theme>(getTheme());
+
+  const submitNew = () => {
+    const k = newKey.trim();
+    const v = newVal.trim();
+    if (!k || !v) return;
+    addMemory(`${k} : ${v}`, "user");
+    setNewKey("");
+    setNewVal("");
+  };
 
   useEffect(() => {
     return subscribeTheme(() => setThemeState(getTheme()));
@@ -64,33 +74,31 @@ export function SettingsDialog({
 
         {tab === "memory" ? (
           <div className="max-h-[60vh] overflow-y-auto scrollbar-thin p-4">
-            <div className="mb-3 flex gap-2">
+            <div className="mb-2 flex items-center gap-2">
               <input
-                value={newMem}
-                onChange={(e) => setNewMem(e.target.value)}
-                placeholder="新增一則關於你的記憶（例：我習慣用 TypeScript）"
+                value={newKey}
+                onChange={(e) => setNewKey(e.target.value)}
+                placeholder="名稱（例：name）"
+                className="w-[38%] rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40"
+                onKeyDown={(e) => { if (e.key === "Enter") submitNew(); }}
+              />
+              <span className="text-muted-foreground">:</span>
+              <input
+                value={newVal}
+                onChange={(e) => setNewVal(e.target.value)}
+                placeholder="內容（例：meow）"
                 className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newMem.trim()) {
-                    addMemory(newMem.trim(), "user");
-                    setNewMem("");
-                  }
-                }}
+                onKeyDown={(e) => { if (e.key === "Enter") submitNew(); }}
               />
               <button
-                onClick={() => {
-                  if (newMem.trim()) {
-                    addMemory(newMem.trim(), "user");
-                    setNewMem("");
-                  }
-                }}
+                onClick={submitNew}
                 className="inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-2 text-sm text-background"
               >
                 <Plus className="h-4 w-4" /> 新增
               </button>
             </div>
             <p className="mb-2 text-[11px] text-muted-foreground">
-              這些記憶會自動帶入每段新對話。AI 也會自動為你新增。
+              格式為「名稱 : 內容」。這些記憶會自動帶入每段新對話，AI 也會自動為你新增。
             </p>
             <div className="space-y-1.5">
               {memories.length === 0 ? (

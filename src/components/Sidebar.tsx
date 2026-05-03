@@ -16,7 +16,12 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
 
   const handleExport = async () => {
     try {
-      await exportConversationsZip(conversations, getMemories());
+      const mems = getMemories();
+      let include = false;
+      if (mems.length > 0) {
+        include = confirm(`是否將你的 ${mems.length} 則記憶一同匯出？\n\n按「確定」包含記憶，按「取消」只匯出對話。`);
+      }
+      await exportConversationsZip(conversations, include ? mems : []);
       toast.success("已匯出 ZIP 檔案");
     } catch (e) {
       toast.error("匯出失敗：" + (e instanceof Error ? e.message : ""));
@@ -27,9 +32,20 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
     try {
       const { conversations: convs, memories } = await importConversationsZip(file);
       storeActions.importConversations(convs);
-      if (memories?.length) importMemories(memories);
+      let importedMem = 0;
+      if (memories?.length) {
+        const preview = memories.slice(0, 5).map((m) => `• ${m.text}`).join("\n");
+        const more = memories.length > 5 ? `\n…還有 ${memories.length - 5} 則` : "";
+        const ok = confirm(
+          `你確定要匯入這些記憶嗎？（共 ${memories.length} 則）\n\n${preview}${more}`
+        );
+        if (ok) {
+          importMemories(memories);
+          importedMem = memories.length;
+        }
+      }
       toast.success(
-        `已匯入 ${convs.length} 筆對話` + (memories?.length ? `、${memories.length} 則記憶` : "")
+        `已匯入 ${convs.length} 筆對話` + (importedMem ? `、${importedMem} 則記憶` : "")
       );
     } catch (e) {
       toast.error("匯入失敗：" + (e instanceof Error ? e.message : ""));
