@@ -71,8 +71,8 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
             <Code2 className="h-4 w-4" />
           </div>
           <div className="flex-1">
-            <div className="text-[15px] font-semibold leading-tight">Coder AI</div>
-            <div className="text-[11px] text-muted-foreground">Pollinations</div>
+            <div className="text-[15px] font-semibold leading-tight">AI Coder Max</div>
+            <div className="text-[11px] text-muted-foreground">GPT4</div>
           </div>
           <button
             onClick={() => setSettingsOpen(true)}

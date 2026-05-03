@@ -51,7 +51,7 @@ export const TOOLS: ToolDef[] = [
     function: {
       name: "save_memory",
       description:
-        "把關於使用者的長期事實或偏好存入永久記憶（跨對話）。格式必須為「名稱 : 內容」，例如「name : meow」、「語言 : 繁體中文」、「技術棧 : React + TypeScript」。請只存高價值、跨對話有用的資訊；同類型只存一次；不要存敏感資料。",
+        "把關於使用者的長期事實或偏好存入永久記憶（跨對話）。格式必須為「記憶名稱：記憶內容」，例如「name：meow」、「語言：繁體中文」、「技術棧：React + TypeScript」。請只存高價值、跨對話有用的資訊；同類型只存一次；不要存敏感資料。",
       parameters: {
         type: "object",
         properties: {
@@ -121,7 +121,7 @@ export async function runTool(
     const key = String(args.key ?? "").trim();
     const value = String(args.value ?? args.fact ?? "").trim();
     if (!key || !value) return { text: "錯誤：缺少 key 或 value" };
-    const fact = `${key} : ${value}`;
+    const fact = `${key}：${value}`;
     const m = addMemory(fact, "ai");
     return { text: `已記住：${fact}`, detail: fact, body: fact, memoryAdded: m.text };
   }

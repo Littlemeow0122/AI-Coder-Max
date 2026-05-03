@@ -40,9 +40,6 @@ export function CodeCanvas() {
   return (
     <aside className="flex w-full max-w-[640px] flex-col border-l border-border bg-card">
       <div className="flex items-center gap-2 border-b border-border px-3 py-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background font-mono text-[10px] uppercase">
-          {ext.slice(0, 4)}
-        </div>
         <div className="min-w-0 flex-1">
           <div className="truncate text-[13px] font-medium">{item.title}</div>
           <div className="text-[11px] text-muted-foreground">{item.language}</div>
