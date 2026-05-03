@@ -185,7 +185,8 @@ export function useChat(conv: Conversation) {
                 let detail: string | undefined;
                 try {
                   const p = JSON.parse(pending[e.id].args || "{}");
-                  detail = p.query || p.url || p.prompt || p.fact || p.title;
+                  detail = p.query || p.url || p.prompt || p.title ||
+                    (p.key && p.value ? `${p.key} : ${p.value}` : p.fact);
                 } catch {
                   /* ignore */
                 }
