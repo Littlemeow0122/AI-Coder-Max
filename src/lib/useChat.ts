@@ -284,14 +284,16 @@ export function useChat(conv: Conversation) {
               content: result.text,
             });
           }
-          // 下一輪：再加一個 thinking step
-          patchAi((m) => ({
-            ...m,
-            steps: [
-              ...(m.steps ?? []),
-              { id: uid(), kind: "thinking", label: "思考中", startedAt: Date.now() },
-            ],
-          }));
+          // 下一輪：再加一個 thinking step（Flash 模式不加）
+          if (!isFlash) {
+            patchAi((m) => ({
+              ...m,
+              steps: [
+                ...(m.steps ?? []),
+                { id: uid(), kind: "thinking", label: "思考中", startedAt: Date.now() },
+              ],
+            }));
+          }
         }
         finalize("已達工具呼叫上限");
       } catch (err) {
