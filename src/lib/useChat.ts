@@ -164,6 +164,7 @@ export function useChat(conv: Conversation) {
             signal: controller.signal,
             onEvent: (e) => {
               if (e.type === "reasoning") {
+                if (isFlash) return; // Flash 模式：忽略思考內容
                 // 把 reasoning 寫入當前 thinking step 的 body
                 patchAi((m) => ({
                   ...m,
