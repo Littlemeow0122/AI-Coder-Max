@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Menu, Code2, Shuffle } from "lucide-react";
+import { Menu, Code2, Shuffle, PanelLeftClose, PanelLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useChat } from "@/lib/useChat";
 import { Sidebar } from "@/components/Sidebar";
@@ -7,6 +7,8 @@ import { Composer } from "@/components/Composer";
 import { MessageBubble } from "@/components/MessageBubble";
 import { CodeCanvas } from "@/components/CodeCanvas";
 import { useCanvas } from "@/lib/canvas";
+import { useSettings, setSettings } from "@/lib/settings";
+import { FpsBadge, ServerSignalBadge } from "@/components/StatusIndicators";
 import { cn } from "@/lib/utils";
 
 const Index = () => {
@@ -14,6 +16,7 @@ const Index = () => {
   const conv = conversations.find((c) => c.id === activeId) ?? conversations[0];
   const { send, stop, retry, busy } = useChat(conv);
   const canvas = useCanvas();
+  const settings = useSettings();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
@@ -23,11 +26,15 @@ const Index = () => {
     el.scrollTop = el.scrollHeight;
   }, [conv?.messages]);
 
+  const collapsed = settings.sidebarCollapsed;
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
-      <div className="hidden md:flex">
-        <Sidebar />
-      </div>
+      {!collapsed && (
+        <div className="hidden md:flex">
+          <Sidebar />
+        </div>
+      )}
 
       {mobileSidebar && (
         <>
@@ -50,11 +57,20 @@ const Index = () => {
           >
             <Menu className="h-5 w-5" />
           </button>
+          <button
+            className="hidden rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex"
+            onClick={() => setSettings({ sidebarCollapsed: !collapsed })}
+            title={collapsed ? "顯示側邊欄" : "隱藏側邊欄"}
+            aria-label="切換側邊欄"
+          >
+            {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </button>
           <Code2 className="h-4 w-4 text-muted-foreground md:hidden" />
           <h1 className="flex-1 truncate text-sm font-medium">{conv?.title ?? "AI Coder Max"}</h1>
-          <span className="hidden rounded-full border bg-card px-2.5 py-0.5 text-[11px] text-muted-foreground sm:inline-block">
-            GPT4
-          </span>
+          <div className="hidden items-center gap-1.5 sm:flex">
+            <FpsBadge />
+            <ServerSignalBadge />
+          </div>
         </header>
 
         <div ref={scrollRef} className={cn("flex-1 overflow-y-auto scrollbar-thin")}>
@@ -69,14 +85,7 @@ const Index = () => {
               ))}
             </div>
           ) : (
-            <EmptyState
-              onPick={(q) =>
-                send(
-                  `${q}\n\n（這是從首頁範例觸發的請求，請完整示範你的能力：1) 先呼叫 rename_chat 為本對話命名；2) 用 web_search 搜尋與本題相關的最新資訊；3) 用 fetch_url 讀取一個相關網頁取得內容；4) 用 generate_image 生成一張與主題相符的示意圖並在回應中以 ![](url) 顯示；5) 用 save_memory 記下一條與我相關的偏好；最後用完整 Markdown 給出答案。）`,
-                  []
-                )
-              }
-            />
+            <EmptyState onPick={(q) => send(q, [])} />
           )}
         </div>
 
