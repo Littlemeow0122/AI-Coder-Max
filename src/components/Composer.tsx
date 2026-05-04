@@ -183,3 +183,78 @@ export function Composer({
     </div>
   );
 }
+
+function ModelPicker() {
+  const s = useSettings();
+  const ids: ModelId[] = ["coder-max-1.0", "coder-max-2.0"];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="hidden sm:inline-flex items-center gap-1 rounded-full border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+          title="選擇模型"
+        >
+          {MODEL_LABEL[s.model]}
+          <ChevronDown className="h-3 w-3" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel>模型</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {ids.map((id) => (
+          <DropdownMenuItem
+            key={id}
+            onClick={() => setSettings({ model: id })}
+            className="flex flex-col items-start gap-0.5"
+          >
+            <div className="flex w-full items-center gap-2">
+              <span className="font-medium">{MODEL_LABEL[id]}</span>
+              {s.model === id && <span className="ml-auto text-[11px] text-muted-foreground">使用中</span>}
+            </div>
+            <span className="text-[11px] text-muted-foreground">{MODEL_DESC[id]}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function ThinkPicker() {
+  const s = useSettings();
+  const ids: ThinkMode[] = ["flash", "pro"];
+  const Icon = s.think === "flash" ? Zap : Brain;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="hidden sm:inline-flex items-center gap-1 rounded-full border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+          title="思考模式"
+        >
+          <Icon className="h-3.5 w-3.5" />
+          {THINK_LABEL[s.think]}
+          <ChevronDown className="h-3 w-3" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel>思考模式</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {ids.map((id) => (
+          <DropdownMenuItem
+            key={id}
+            onClick={() => setSettings({ think: id })}
+            className="flex flex-col items-start gap-0.5"
+          >
+            <div className="flex w-full items-center gap-2">
+              {id === "flash" ? <Zap className="h-3.5 w-3.5" /> : <Brain className="h-3.5 w-3.5" />}
+              <span className="font-medium">{THINK_LABEL[id]}</span>
+              {s.think === id && <span className="ml-auto text-[11px] text-muted-foreground">使用中</span>}
+            </div>
+            <span className="pl-5 text-[11px] text-muted-foreground">{THINK_DESC[id]}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
