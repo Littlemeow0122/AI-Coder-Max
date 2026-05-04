@@ -104,18 +104,24 @@ export function useChat(conv: Conversation) {
         }));
       };
 
-      // 一個正在進行的 thinking step
-      const thinkStep: StatusStep = {
-        id: uid(),
-        kind: "thinking",
-        label: "思考中",
-        startedAt: Date.now(),
-      };
-      patchAi((m) => ({
-        ...m,
-        steps: [...(m.steps ?? []), thinkStep],
-        error: undefined,
-      }));
+      const isFlash = getSettings().think === "flash";
+
+      // 一個正在進行的 thinking step（Flash 模式不顯示）
+      if (!isFlash) {
+        const thinkStep: StatusStep = {
+          id: uid(),
+          kind: "thinking",
+          label: "思考中",
+          startedAt: Date.now(),
+        };
+        patchAi((m) => ({
+          ...m,
+          steps: [...(m.steps ?? []), thinkStep],
+          error: undefined,
+        }));
+      } else {
+        patchAi((m) => ({ ...m, error: undefined }));
+      }
 
       let apiMessages = baseMessages;
 
