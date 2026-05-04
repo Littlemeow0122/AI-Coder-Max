@@ -1,8 +1,26 @@
 import { useRef, useState, KeyboardEvent, ChangeEvent } from "react";
-import { Paperclip, ArrowUp, Square, X } from "lucide-react";
+import { Paperclip, ArrowUp, Square, X, ChevronDown, Zap, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Attachment } from "@/lib/types";
 import { uid } from "@/lib/format";
+import {
+  useSettings,
+  setSettings,
+  MODEL_LABEL,
+  MODEL_DESC,
+  THINK_LABEL,
+  THINK_DESC,
+  type ModelId,
+  type ThinkMode,
+} from "@/lib/settings";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const TEXT_EXT = /\.(txt|md|json|csv|tsv|log|xml|yaml|yml|html|htm|css|scss|less|js|jsx|ts|tsx|py|go|rs|java|c|h|cpp|hpp|cs|rb|php|sh|bash|zsh|sql|toml|ini|env|swift|kt|dart)$/i;
 
