@@ -153,6 +153,8 @@ export function Composer({
             placeholder="問 AI Coder Max 任何程式問題…"
             className="max-h-60 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-muted-foreground"
           />
+          <ModelPicker />
+          <ThinkPicker />
           {busy ? (
             <button
               type="button"
