@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SettingsDialog } from "./SettingsDialog";
 import { importMemories, getMemories } from "@/lib/memory";
+import { FpsBadge } from "./StatusIndicators";
 
 export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const { conversations, activeId } = useStore();
@@ -72,7 +73,9 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
           </div>
           <div className="flex-1">
             <div className="text-[15px] font-semibold leading-tight">AI Coder Max</div>
-            <div className="text-[11px] text-muted-foreground">GPT4</div>
+            <div className="mt-0.5 flex items-center gap-1">
+              <FpsBadge />
+            </div>
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
