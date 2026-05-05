@@ -104,24 +104,18 @@ export function useChat(conv: Conversation) {
         }));
       };
 
-      const isFlash = getSettings().think === "flash";
-
-      // 一個正在進行的 thinking step（Flash 模式不顯示）
-      if (!isFlash) {
-        const thinkStep: StatusStep = {
-          id: uid(),
-          kind: "thinking",
-          label: "思考中",
-          startedAt: Date.now(),
-        };
-        patchAi((m) => ({
-          ...m,
-          steps: [...(m.steps ?? []), thinkStep],
-          error: undefined,
-        }));
-      } else {
-        patchAi((m) => ({ ...m, error: undefined }));
-      }
+      // 一個正在進行的 thinking step（Flash 模式也顯示，但不寫入內容）
+      const thinkStep: StatusStep = {
+        id: uid(),
+        kind: "thinking",
+        label: "思考中",
+        startedAt: Date.now(),
+      };
+      patchAi((m) => ({
+        ...m,
+        steps: [...(m.steps ?? []), thinkStep],
+        error: undefined,
+      }));
 
       let apiMessages = baseMessages;
 
@@ -164,7 +158,7 @@ export function useChat(conv: Conversation) {
             signal: controller.signal,
             onEvent: (e) => {
               if (e.type === "reasoning") {
-                if (isFlash) return; // Flash 模式：忽略思考內容
+                if (getSettings().think === "flash") return; // Flash：不寫入細節，只顯示「思考中」chip
                 // 把 reasoning 寫入當前 thinking step 的 body
                 patchAi((m) => ({
                   ...m,
@@ -284,16 +278,14 @@ export function useChat(conv: Conversation) {
               content: result.text,
             });
           }
-          // 下一輪：再加一個 thinking step（Flash 模式不加）
-          if (!isFlash) {
-            patchAi((m) => ({
-              ...m,
-              steps: [
-                ...(m.steps ?? []),
-                { id: uid(), kind: "thinking", label: "思考中", startedAt: Date.now() },
-              ],
-            }));
-          }
+          // 下一輪：再加一個 thinking step
+          patchAi((m) => ({
+            ...m,
+            steps: [
+              ...(m.steps ?? []),
+              { id: uid(), kind: "thinking", label: "思考中", startedAt: Date.now() },
+            ],
+          }));
         }
         finalize("已達工具呼叫上限");
       } catch (err) {
