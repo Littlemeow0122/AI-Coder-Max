@@ -7,6 +7,7 @@ import { streamChat, type ChatMessage, type ChatPart } from "./pollinations";
 import { TOOLS, runTool } from "./tools";
 import { memoriesAsSystemText } from "./memory";
 import { getSettings, MODEL_LABEL, type ModelId, type ThinkMode } from "./settings";
+import { emitServerHealth } from "./serverHealth";
 
 function systemBase(model: ModelId, think: ThinkMode): string {
   const modelName = MODEL_LABEL[model];
