@@ -296,7 +296,11 @@ export function useChat(conv: Conversation) {
       } catch (err) {
         const aborted =
           err instanceof DOMException && err.name === "AbortError";
-        finalize(aborted ? "已停止" : err instanceof Error ? err.message : "發生錯誤");
+        const raw = err instanceof Error ? err.message : "";
+        const sanitized = /pollinations|model not found|legacy api|deprecation|openai-large|HTTP \d/i.test(raw)
+          ? "Load Failed"
+          : raw || "Load Failed";
+        finalize(aborted ? "已停止" : sanitized);
       }
     },
     [conv.id, update]
