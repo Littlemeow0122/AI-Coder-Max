@@ -78,7 +78,10 @@ export async function streamChat(opts: {
 
   if (!resp.ok || !resp.body) {
     const txt = await resp.text().catch(() => "");
-    opts.onEvent({ type: "error", message: `HTTP ${resp.status}: ${txt.slice(0, 300)}` });
+    const isPoll =
+      /pollinations|legacy api|deprecation|model not found|enter\.pollinations|openai-large/i.test(txt);
+    const msg = isPoll || resp.status === 404 ? "Load Failed" : `Load Failed (${resp.status})`;
+    opts.onEvent({ type: "error", message: msg });
     return;
   }
 
