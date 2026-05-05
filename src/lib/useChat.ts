@@ -152,7 +152,12 @@ export function useChat(conv: Conversation) {
             }));
           };
 
+          // 若訊息中含有圖片，使用視覺模型
+          const hasImage = apiMessages.some(
+            (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url")
+          );
           await streamChat({
+            model: hasImage ? "openai-large" : "openai",
             messages: apiMessages,
             tools: TOOLS,
             signal: controller.signal,
