@@ -12,8 +12,8 @@ function systemBase(model: ModelId, think: ThinkMode): string {
   const modelName = MODEL_LABEL[model];
   const thinkRule =
     think === "flash"
-      ? "- 你目前是 Flash 模式：不要輸出任何 reasoning/思考內容；直接、極簡、快速回答。"
-      : "- 你目前是 Pro 模式：可以做仔細推理，reasoning 可較完整但仍精簡（最多 3–5 句），用於展示思路。";
+      ? "- 你目前是 Flash 模式：可以做思考，但**不要輸出任何 reasoning/思考內容**（系統會顯示「思考中」但不展示細節）。回答比 Pro 短一些，但仍需完整、自然，不要過度精簡。仍然可以使用所有工具（rename_chat、web_search、fetch_url、generate_image、save_memory）。"
+      : "- 你目前是 Pro 模式：可詳細推理，reasoning 可較長且完整（5–12 句以上），回答也可以更深入、更詳盡。可使用所有工具。";
   const smartRule =
     model === "coder-max-1.0"
       ? "- 你目前是 Coder Max 1.0：能力一般，適合處理小事物；回答簡短、不過度延伸。"
