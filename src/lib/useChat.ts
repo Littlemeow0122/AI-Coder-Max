@@ -302,6 +302,7 @@ export function useChat(conv: Conversation) {
         const sanitized = /pollinations|model not found|legacy api|deprecation|openai-large|HTTP \d/i.test(raw)
           ? "Load Failed"
           : raw || "Load Failed";
+        if (!aborted) emitServerHealth("fail");
         finalize(aborted ? "已停止" : sanitized);
       }
     },
