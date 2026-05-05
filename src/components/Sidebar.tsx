@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SettingsDialog } from "./SettingsDialog";
 import { importMemories, getMemories } from "@/lib/memory";
-import { FpsBadge } from "./StatusIndicators";
+import { FpsBadge, ServerHealthChart } from "./StatusIndicators";
 
 export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const { conversations, activeId } = useStore();
