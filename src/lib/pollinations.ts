@@ -69,16 +69,21 @@ export async function streamChat(opts: {
       signal: opts.signal,
     });
   } catch (e) {
-    opts.onEvent({
-      type: "error",
-      message: e instanceof Error ? e.message : "Network error",
-    });
+    const m = e instanceof Error ? e.message : "";
+    if (e instanceof DOMException && e.name === "AbortError") {
+      opts.onEvent({ type: "error", message: "已停止" });
+    } else {
+      opts.onEvent({ type: "error", message: /pollinations/i.test(m) ? "Load Failed" : "Load Failed" });
+    }
     return;
   }
 
   if (!resp.ok || !resp.body) {
     const txt = await resp.text().catch(() => "");
-    opts.onEvent({ type: "error", message: `HTTP ${resp.status}: ${txt.slice(0, 300)}` });
+    const isPoll =
+      /pollinations|legacy api|deprecation|model not found|enter\.pollinations|openai-large/i.test(txt);
+    const msg = isPoll || resp.status === 404 ? "Load Failed" : `Load Failed (${resp.status})`;
+    opts.onEvent({ type: "error", message: msg });
     return;
   }
 

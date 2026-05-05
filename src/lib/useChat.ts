@@ -7,13 +7,14 @@ import { streamChat, type ChatMessage, type ChatPart } from "./pollinations";
 import { TOOLS, runTool } from "./tools";
 import { memoriesAsSystemText } from "./memory";
 import { getSettings, MODEL_LABEL, type ModelId, type ThinkMode } from "./settings";
+import { emitServerHealth } from "./serverHealth";
 
 function systemBase(model: ModelId, think: ThinkMode): string {
   const modelName = MODEL_LABEL[model];
   const thinkRule =
     think === "flash"
-      ? "- 你目前是 Flash 模式：可以做思考，但**不要輸出任何 reasoning/思考內容**（系統會顯示「思考中」但不展示細節）。回答比 Pro 短一些，但仍需完整、自然，不要過度精簡。仍然可以使用所有工具（rename_chat、web_search、fetch_url、generate_image、save_memory）。"
-      : "- 你目前是 Pro 模式：可詳細推理，reasoning 可較長且完整（5–12 句以上），回答也可以更深入、更詳盡。可使用所有工具。";
+      ? "- 你目前是 Flash 模式：可以做思考，但**不要輸出任何 reasoning/思考內容**（系統只顯示「思考中」chip）。**回答需要很長、很完整、很詳盡**（至少 8–15 段或大量條列、範例、程式碼）；雖然比 Pro 略短，但絕對不要簡短帶過。即使被問「你是什麼模型」也要詳細介紹自己（版本、能力、使用情境、可用工具等），不可一句話結束。仍然可使用所有工具。"
+      : "- 你目前是 Pro 模式：可詳細推理（reasoning 10–20 句以上）。**回答必須極度詳盡、超長、深入**（盡可能多段、多範例、多程式碼、多比較表）；比 Flash 還要更長更深。可使用所有工具。";
   const smartRule =
     model === "coder-max-1.0"
       ? "- 你目前是 Coder Max 1.0：能力一般，適合處理小事物；回答簡短、不過度延伸。"
@@ -157,7 +158,7 @@ export function useChat(conv: Conversation) {
             (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url")
           );
           await streamChat({
-            model: hasImage ? "openai-large" : "openai",
+            model: hasImage ? "openai" : "openai",
             messages: apiMessages,
             tools: TOOLS,
             signal: controller.signal,
@@ -238,6 +239,7 @@ export function useChat(conv: Conversation) {
           });
 
           if (assistantToolCalls.length === 0) {
+            emitServerHealth("ok");
             finalize();
             return;
           }
@@ -296,7 +298,12 @@ export function useChat(conv: Conversation) {
       } catch (err) {
         const aborted =
           err instanceof DOMException && err.name === "AbortError";
-        finalize(aborted ? "已停止" : err instanceof Error ? err.message : "發生錯誤");
+        const raw = err instanceof Error ? err.message : "";
+        const sanitized = /pollinations|model not found|legacy api|deprecation|openai-large|HTTP \d/i.test(raw)
+          ? "Load Failed"
+          : raw || "Load Failed";
+        if (!aborted) emitServerHealth("fail");
+        finalize(aborted ? "已停止" : sanitized);
       }
     },
     [conv.id, update]

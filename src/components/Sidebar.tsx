@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SettingsDialog } from "./SettingsDialog";
 import { importMemories, getMemories } from "@/lib/memory";
-import { FpsBadge } from "./StatusIndicators";
+import { FpsBadge, ServerHealthChart } from "./StatusIndicators";
 
 export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const { conversations, activeId } = useStore();
@@ -161,7 +161,8 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
           ))}
         </div>
 
-        <div className="border-t border-border p-3">
+        <div className="border-t border-border p-3 space-y-2">
+          <ServerHealthChart />
           <div className="flex gap-2">
             <button
               onClick={handleExport}
