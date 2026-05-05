@@ -157,7 +157,7 @@ export function useChat(conv: Conversation) {
             (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url")
           );
           await streamChat({
-            model: hasImage ? "openai-large" : "openai",
+            model: hasImage ? "openai" : "openai",
             messages: apiMessages,
             tools: TOOLS,
             signal: controller.signal,
