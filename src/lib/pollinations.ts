@@ -69,10 +69,12 @@ export async function streamChat(opts: {
       signal: opts.signal,
     });
   } catch (e) {
-    opts.onEvent({
-      type: "error",
-      message: e instanceof Error ? e.message : "Network error",
-    });
+    const m = e instanceof Error ? e.message : "";
+    if (e instanceof DOMException && e.name === "AbortError") {
+      opts.onEvent({ type: "error", message: "已停止" });
+    } else {
+      opts.onEvent({ type: "error", message: /pollinations/i.test(m) ? "Load Failed" : "Load Failed" });
+    }
     return;
   }
 
