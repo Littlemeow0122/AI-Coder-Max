@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { useEffect, useState } from "react";
 import type { Message } from "@/lib/types";
 import { formatDateTime, formatDuration } from "@/lib/format";
@@ -33,7 +34,20 @@ export function MessageBubble({
     ? (message.finishedAt ?? Date.now()) - message.createdAt
     : 0;
 
-  const segments = isAssistant ? parseMarkdownSegments(message.content) : [];
+  // 過濾 Pollinations 廣告片段（出現「🌸 Ad 🌸」或 "Support Pollinations" 之後的全部內容）
+  const cleanContent = (() => {
+    if (!isAssistant) return message.content;
+    let s = message.content;
+    const markers = [
+      /\n*-{2,}\s*\n*\s*\*?\*?Support Pollinations[\s\S]*$/i,
+      /\n*Support Pollinations[\s\S]*$/i,
+      /\n*🌸\s*Ad\s*🌸[\s\S]*$/i,
+      /\n*Powered by Pollinations[\s\S]*$/i,
+    ];
+    for (const re of markers) s = s.replace(re, "");
+    return s;
+  })();
+  const segments = isAssistant ? parseMarkdownSegments(cleanContent) : [];
 
   return (
     <div className={cn("flex w-full animate-fade-up", isUser ? "justify-end" : "justify-start")}>
@@ -86,7 +100,7 @@ export function MessageBubble({
               {segments.map((seg, i) => {
                 if (seg.type === "text") {
                   return (
-                    <ReactMarkdown key={i} remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                       {seg.text}
                     </ReactMarkdown>
                   );

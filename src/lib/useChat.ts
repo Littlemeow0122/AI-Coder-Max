@@ -12,8 +12,8 @@ function systemBase(model: ModelId, think: ThinkMode): string {
   const modelName = MODEL_LABEL[model];
   const thinkRule =
     think === "flash"
-      ? "- 你目前是 Flash 模式：不要輸出任何 reasoning/思考內容；直接、極簡、快速回答。"
-      : "- 你目前是 Pro 模式：可以做仔細推理，reasoning 可較完整但仍精簡（最多 3–5 句），用於展示思路。";
+      ? "- 你目前是 Flash 模式：可以做思考，但**不要輸出任何 reasoning/思考內容**（系統會顯示「思考中」但不展示細節）。回答比 Pro 短一些，但仍需完整、自然，不要過度精簡。仍然可以使用所有工具（rename_chat、web_search、fetch_url、generate_image、save_memory）。"
+      : "- 你目前是 Pro 模式：可詳細推理，reasoning 可較長且完整（5–12 句以上），回答也可以更深入、更詳盡。可使用所有工具。";
   const smartRule =
     model === "coder-max-1.0"
       ? "- 你目前是 Coder Max 1.0：能力一般，適合處理小事物；回答簡短、不過度延伸。"
@@ -104,24 +104,18 @@ export function useChat(conv: Conversation) {
         }));
       };
 
-      const isFlash = getSettings().think === "flash";
-
-      // 一個正在進行的 thinking step（Flash 模式不顯示）
-      if (!isFlash) {
-        const thinkStep: StatusStep = {
-          id: uid(),
-          kind: "thinking",
-          label: "思考中",
-          startedAt: Date.now(),
-        };
-        patchAi((m) => ({
-          ...m,
-          steps: [...(m.steps ?? []), thinkStep],
-          error: undefined,
-        }));
-      } else {
-        patchAi((m) => ({ ...m, error: undefined }));
-      }
+      // 一個正在進行的 thinking step（Flash 模式也顯示，但不寫入內容）
+      const thinkStep: StatusStep = {
+        id: uid(),
+        kind: "thinking",
+        label: "思考中",
+        startedAt: Date.now(),
+      };
+      patchAi((m) => ({
+        ...m,
+        steps: [...(m.steps ?? []), thinkStep],
+        error: undefined,
+      }));
 
       let apiMessages = baseMessages;
 
@@ -158,13 +152,18 @@ export function useChat(conv: Conversation) {
             }));
           };
 
+          // 若訊息中含有圖片，使用視覺模型
+          const hasImage = apiMessages.some(
+            (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url")
+          );
           await streamChat({
+            model: hasImage ? "openai-large" : "openai",
             messages: apiMessages,
             tools: TOOLS,
             signal: controller.signal,
             onEvent: (e) => {
               if (e.type === "reasoning") {
-                if (isFlash) return; // Flash 模式：忽略思考內容
+                if (getSettings().think === "flash") return; // Flash：不寫入細節，只顯示「思考中」chip
                 // 把 reasoning 寫入當前 thinking step 的 body
                 patchAi((m) => ({
                   ...m,
@@ -284,16 +283,14 @@ export function useChat(conv: Conversation) {
               content: result.text,
             });
           }
-          // 下一輪：再加一個 thinking step（Flash 模式不加）
-          if (!isFlash) {
-            patchAi((m) => ({
-              ...m,
-              steps: [
-                ...(m.steps ?? []),
-                { id: uid(), kind: "thinking", label: "思考中", startedAt: Date.now() },
-              ],
-            }));
-          }
+          // 下一輪：再加一個 thinking step
+          patchAi((m) => ({
+            ...m,
+            steps: [
+              ...(m.steps ?? []),
+              { id: uid(), kind: "thinking", label: "思考中", startedAt: Date.now() },
+            ],
+          }));
         }
         finalize("已達工具呼叫上限");
       } catch (err) {

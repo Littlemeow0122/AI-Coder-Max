@@ -55,8 +55,8 @@ export function ServerSignalBadge() {
       }
       const start = performance.now();
       try {
-        await fetch("https://text.pollinations.ai/openai", {
-          method: "OPTIONS",
+        await fetch("https://text.pollinations.ai/?ping=" + Date.now(), {
+          method: "GET",
           mode: "no-cors",
           cache: "no-store",
         });
@@ -66,7 +66,7 @@ export function ServerSignalBadge() {
       }
     };
     measure();
-    const i = setInterval(measure, 10000);
+    const i = setInterval(measure, 8000);
     return () => {
       killed = true;
       clearInterval(i);

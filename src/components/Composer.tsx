@@ -192,10 +192,11 @@ function ModelPicker() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="hidden sm:inline-flex items-center gap-1 rounded-full border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="inline-flex items-center gap-1 rounded-full border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
           title="選擇模型"
         >
-          {MODEL_LABEL[s.model]}
+          <span className="hidden sm:inline">{MODEL_LABEL[s.model]}</span>
+          <span className="sm:hidden">{s.model === "coder-max-1.0" ? "1.0" : "2.0"}</span>
           <ChevronDown className="h-3 w-3" />
         </button>
       </DropdownMenuTrigger>
@@ -229,11 +230,11 @@ function ThinkPicker() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="hidden sm:inline-flex items-center gap-1 rounded-full border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="inline-flex items-center gap-1 rounded-full border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
           title="思考模式"
         >
           <Icon className="h-3.5 w-3.5" />
-          {THINK_LABEL[s.think]}
+          <span className="hidden sm:inline">{THINK_LABEL[s.think]}</span>
           <ChevronDown className="h-3 w-3" />
         </button>
       </DropdownMenuTrigger>
