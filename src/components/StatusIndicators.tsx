@@ -1,7 +1,8 @@
 // 顯示 FPS 與伺服器訊號的小徽章
-import { useEffect, useState } from "react";
-import { Activity, Wifi, WifiOff } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Activity, Wifi, WifiOff, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { onServerHealth } from "@/lib/serverHealth";
 
 export function FpsBadge() {
   const [fps, setFps] = useState(60);
