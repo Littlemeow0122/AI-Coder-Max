@@ -239,6 +239,7 @@ export function useChat(conv: Conversation) {
           });
 
           if (assistantToolCalls.length === 0) {
+            emitServerHealth("ok");
             finalize();
             return;
           }
