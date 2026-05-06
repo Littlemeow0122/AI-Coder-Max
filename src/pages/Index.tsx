@@ -29,7 +29,7 @@ const Index = () => {
   const collapsed = settings.sidebarCollapsed;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground pt-safe pb-safe pl-safe pr-safe">
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       {!collapsed && (
         <div className="hidden md:flex">
           <Sidebar />
@@ -49,7 +49,7 @@ const Index = () => {
       )}
 
       <main className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-2 border-b border-border glass px-4 py-3">
+        <header className="flex items-center gap-2 border-b border-border glass px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
           <button
             className="rounded-lg p-1.5 hover:bg-muted md:hidden"
             onClick={() => setMobileSidebar(true)}
