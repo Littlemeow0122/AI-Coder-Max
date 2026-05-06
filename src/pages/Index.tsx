@@ -8,7 +8,6 @@ import { MessageBubble } from "@/components/MessageBubble";
 import { CodeCanvas } from "@/components/CodeCanvas";
 import { useCanvas } from "@/lib/canvas";
 import { useSettings, setSettings } from "@/lib/settings";
-import { FpsBadge, ServerSignalBadge } from "@/components/StatusIndicators";
 import { cn } from "@/lib/utils";
 
 const Index = () => {
@@ -67,10 +66,6 @@ const Index = () => {
           </button>
           <Code2 className="h-4 w-4 text-muted-foreground md:hidden" />
           <h1 className="flex-1 truncate text-sm font-medium">{conv?.title ?? "AI Coder Max"}</h1>
-          <div className="hidden items-center gap-1.5 sm:flex">
-            <FpsBadge />
-            <ServerSignalBadge />
-          </div>
         </header>
 
         <div ref={scrollRef} className={cn("flex-1 overflow-y-auto scrollbar-thin")}>
