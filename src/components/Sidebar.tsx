@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SettingsDialog } from "./SettingsDialog";
 import { importMemories, getMemories } from "@/lib/memory";
-import { FpsBadge, ServerHealthChart } from "./StatusIndicators";
+import { SelectDialog, type SelectGroup } from "./SelectDialog";
+import type { Conversation, Memory } from "@/lib/types";
 
 export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const { conversations, activeId } = useStore();
@@ -15,42 +16,53 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const [editingText, setEditingText] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const handleExport = async () => {
+  // 匯出選擇
+  const [exportOpen, setExportOpen] = useState(false);
+  // 匯入選擇
+  const [importOpen, setImportOpen] = useState(false);
+  const [importPayload, setImportPayload] = useState<{
+    conversations: Conversation[];
+    memories: Memory[];
+  } | null>(null);
+
+  const onExportClick = () => setExportOpen(true);
+
+  const handleExportConfirm = async (sel: Record<string, string[]>) => {
+    setExportOpen(false);
     try {
-      const mems = getMemories();
-      let include = false;
-      if (mems.length > 0) {
-        include = confirm(`是否將你的 ${mems.length} 則記憶一同匯出？\n\n按「確定」包含記憶，按「取消」只匯出對話。`);
+      const allMems = getMemories();
+      const chosenConvs = conversations.filter((c) => sel.chats?.includes(c.id));
+      const chosenMems = allMems.filter((m) => sel.memories?.includes(m.id));
+      if (chosenConvs.length === 0 && chosenMems.length === 0) {
+        toast.error("請至少選擇一項");
+        return;
       }
-      await exportConversationsZip(conversations, include ? mems : []);
-      toast.success("已匯出 ZIP 檔案");
+      await exportConversationsZip(chosenConvs, chosenMems);
+      toast.success(`已匯出 ${chosenConvs.length} 筆對話、${chosenMems.length} 則記憶`);
     } catch (e) {
       toast.error("匯出失敗：" + (e instanceof Error ? e.message : ""));
     }
   };
 
-  const handleImport = async (file: File) => {
+  const handleImportFile = async (file: File) => {
     try {
-      const { conversations: convs, memories } = await importConversationsZip(file);
-      storeActions.importConversations(convs);
-      let importedMem = 0;
-      if (memories?.length) {
-        const preview = memories.slice(0, 5).map((m) => `• ${m.text}`).join("\n");
-        const more = memories.length > 5 ? `\n…還有 ${memories.length - 5} 則` : "";
-        const ok = confirm(
-          `你確定要匯入這些記憶嗎？（共 ${memories.length} 則）\n\n${preview}${more}`
-        );
-        if (ok) {
-          importMemories(memories);
-          importedMem = memories.length;
-        }
-      }
-      toast.success(
-        `已匯入 ${convs.length} 筆對話` + (importedMem ? `、${importedMem} 則記憶` : "")
-      );
+      const data = await importConversationsZip(file);
+      setImportPayload(data);
+      setImportOpen(true);
     } catch (e) {
       toast.error("匯入失敗：" + (e instanceof Error ? e.message : ""));
     }
+  };
+
+  const handleImportConfirm = (sel: Record<string, string[]>) => {
+    if (!importPayload) return;
+    setImportOpen(false);
+    const convs = importPayload.conversations.filter((c) => sel.chats?.includes(c.id));
+    const mems = importPayload.memories.filter((m) => sel.memories?.includes(m.id));
+    if (convs.length) storeActions.importConversations(convs);
+    if (mems.length) importMemories(mems);
+    toast.success(`已匯入 ${convs.length} 筆對話、${mems.length} 則記憶`);
+    setImportPayload(null);
   };
 
   const startEdit = (id: string, title: string) => {
@@ -64,26 +76,52 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
     setEditingId(null);
   };
 
+  const exportGroups: SelectGroup<Conversation | Memory>[] = [
+    {
+      key: "chats",
+      title: "聊天",
+      items: conversations,
+      render: (c) => (c as Conversation).title || "新對話",
+      idOf: (c) => (c as Conversation).id,
+    },
+    {
+      key: "memories",
+      title: "記憶",
+      items: getMemories(),
+      render: (m) => (m as Memory).text,
+      idOf: (m) => (m as Memory).id,
+    },
+  ];
+
+  const importGroups: SelectGroup<Conversation | Memory>[] = importPayload
+    ? [
+        {
+          key: "chats",
+          title: "聊天",
+          items: importPayload.conversations,
+          render: (c) => (c as Conversation).title || "新對話",
+          idOf: (c) => (c as Conversation).id,
+        },
+        {
+          key: "memories",
+          title: "記憶",
+          items: importPayload.memories,
+          render: (m) => (m as Memory).text,
+          idOf: (m) => (m as Memory).id,
+        },
+      ]
+    : [];
+
   return (
     <>
       <aside className="flex h-full w-[260px] shrink-0 flex-col border-r border-border bg-sidebar">
-        <div className="flex items-center gap-2 px-4 py-4">
+        <div className="flex items-center gap-2 px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background">
             <Code2 className="h-4 w-4" />
           </div>
           <div className="flex-1">
             <div className="text-[15px] font-semibold leading-tight">AI Coder Max</div>
-            <div className="mt-0.5 flex items-center gap-1">
-              <FpsBadge />
-            </div>
           </div>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-            title="設定"
-          >
-            <Settings className="h-4 w-4" />
-          </button>
         </div>
 
         <div className="px-3">
@@ -161,11 +199,16 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
           ))}
         </div>
 
-        <div className="border-t border-border p-3 space-y-2">
-          <ServerHealthChart />
+        <div className="border-t border-border p-3 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg border bg-card px-2 py-2 text-xs transition-colors hover:bg-muted"
+          >
+            <Settings className="h-3.5 w-3.5" /> 設定
+          </button>
           <div className="flex gap-2">
             <button
-              onClick={handleExport}
+              onClick={onExportClick}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border bg-card px-2 py-2 text-xs transition-colors hover:bg-muted"
             >
               <Download className="h-3.5 w-3.5" /> 匯出
@@ -183,7 +226,7 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) handleImport(f);
+                if (f) handleImportFile(f);
                 if (fileRef.current) fileRef.current.value = "";
               }}
             />
@@ -191,6 +234,26 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
         </div>
       </aside>
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      <SelectDialog
+        open={exportOpen}
+        title="匯出"
+        description="勾選想匯出的聊天與記憶（預設全選）。"
+        groups={exportGroups}
+        confirmText="匯出"
+        onClose={() => setExportOpen(false)}
+        onConfirm={handleExportConfirm}
+      />
+
+      <SelectDialog
+        open={importOpen}
+        title="匯入"
+        description="你確定要匯入這些項目嗎？預設全選，可取消。"
+        groups={importGroups}
+        confirmText="匯入"
+        onClose={() => { setImportOpen(false); setImportPayload(null); }}
+        onConfirm={handleImportConfirm}
+      />
     </>
   );
 }
