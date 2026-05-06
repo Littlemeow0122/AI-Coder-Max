@@ -29,7 +29,7 @@ const Index = () => {
   const collapsed = settings.sidebarCollapsed;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground pt-safe pb-safe pl-safe pr-safe">
       {!collapsed && (
         <div className="hidden md:flex">
           <Sidebar />
