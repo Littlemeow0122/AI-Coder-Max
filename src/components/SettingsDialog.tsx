@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Settings, BookMarked, Trash2, Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Settings, Trash2, Plus, X } from "lucide-react";
 import {
   useMemories,
   addMemory,
   deleteMemory,
   clearMemories,
 } from "@/lib/memory";
+import { storeActions, useStore } from "@/lib/store";
 import { getTheme, setTheme, subscribeTheme, type Theme } from "@/lib/theme";
-import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function SettingsDialog({
@@ -18,10 +18,14 @@ export function SettingsDialog({
   onClose: () => void;
 }) {
   const memories = useMemories();
-  const [tab, setTab] = useState<"memory" | "appearance">("memory");
+  const { conversations } = useStore();
   const [newKey, setNewKey] = useState("");
   const [newVal, setNewVal] = useState("");
   const [theme, setThemeState] = useState<Theme>(getTheme());
+
+  useEffect(() => {
+    return subscribeTheme(() => setThemeState(getTheme()));
+  }, []);
 
   const submitNew = () => {
     const k = newKey.trim();
@@ -32,16 +36,12 @@ export function SettingsDialog({
     setNewVal("");
   };
 
-  useEffect(() => {
-    return subscribeTheme(() => setThemeState(getTheme()));
-  }, []);
-
   if (!open) return null;
 
   return (
     <>
       <div className="fixed inset-0 z-[60] bg-black/40" onClick={onClose} />
-      <div className="fixed left-1/2 top-1/2 z-[70] w-[min(560px,92vw)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-soft)]">
+      <div className="fixed left-1/2 top-1/2 z-[70] w-[min(560px,92vw)] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-soft)] flex flex-col">
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -51,29 +51,33 @@ export function SettingsDialog({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="flex border-b">
-          <button
-            onClick={() => setTab("memory")}
-            className={cn(
-              "flex-1 py-2 text-sm",
-              tab === "memory" ? "border-b-2 border-foreground font-medium" : "text-muted-foreground"
-            )}
-          >
-            <BookMarked className="mr-1 inline h-3.5 w-3.5" /> 記憶
-          </button>
-          <button
-            onClick={() => setTab("appearance")}
-            className={cn(
-              "flex-1 py-2 text-sm",
-              tab === "appearance" ? "border-b-2 border-foreground font-medium" : "text-muted-foreground"
-            )}
-          >
-            外觀
-          </button>
-        </div>
 
-        {tab === "memory" ? (
-          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin p-4">
+        <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-6">
+          {/* 主題 */}
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">主題</h3>
+            <div className="flex gap-2">
+              {(["system", "light", "dark"] as Theme[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={cn(
+                    "flex-1 rounded-lg border px-3 py-2.5 text-sm",
+                    theme === t ? "border-foreground bg-muted font-medium" : "hover:bg-muted"
+                  )}
+                >
+                  {t === "system" ? "跟隨系統" : t === "light" ? "淺色" : "深色"}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[12px] text-muted-foreground">
+              預設跟隨系統設定。手動切換後會記住偏好。
+            </p>
+          </section>
+
+          {/* 記憶 */}
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">記憶</h3>
             <div className="mb-2 flex items-center gap-2">
               <input
                 value={newKey}
@@ -98,9 +102,9 @@ export function SettingsDialog({
               </button>
             </div>
             <p className="mb-2 text-[11px] text-muted-foreground">
-              格式為「名稱 : 內容」。這些記憶會自動帶入每段新對話，AI 也會自動為你新增。
+              格式為「名稱：內容」。這些記憶會自動帶入每段新對話，AI 也會自動為你新增。
             </p>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 max-h-56 overflow-y-auto scrollbar-thin">
               {memories.length === 0 ? (
                 <div className="rounded-lg border border-dashed py-6 text-center text-xs text-muted-foreground">
                   目前沒有記憶
@@ -136,34 +140,33 @@ export function SettingsDialog({
                 onClick={() => {
                   if (confirm("清除所有記憶？")) clearMemories();
                 }}
-                className="mt-3 text-[12px] text-destructive hover:underline"
+                className="mt-2 text-[12px] text-destructive hover:underline"
               >
                 清除全部記憶
               </button>
             )}
-          </div>
-        ) : (
-          <div className="p-4">
-            <div className="mb-2 text-sm font-medium">主題</div>
-            <div className="flex gap-2">
-              {(["system", "light", "dark"] as Theme[]).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTheme(t)}
-                  className={cn(
-                    "flex-1 rounded-lg border px-3 py-3 text-sm",
-                    theme === t ? "border-foreground bg-muted font-medium" : "hover:bg-muted"
-                  )}
-                >
-                  {t === "system" ? "跟隨系統" : t === "light" ? "淺色" : "深色"}
-                </button>
-              ))}
-            </div>
-            <p className="mt-3 text-[12px] text-muted-foreground">
-              預設跟隨系統設定。手動切換後會記住偏好；切回「跟隨系統」會即時跟隨裝置主題切換。
+          </section>
+
+          {/* 資料管理 */}
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">資料管理</h3>
+            <button
+              onClick={() => {
+                if (confirm(`確定要刪除全部 ${conversations.length} 段聊天記錄嗎？此動作無法復原。`)) {
+                  for (const c of [...conversations]) {
+                    storeActions.deleteConversation(c.id);
+                  }
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4" /> 刪除全部聊天記錄
+            </button>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              將清除所有對話歷史（記憶不受影響）。
             </p>
-          </div>
-        )}
+          </section>
+        </div>
       </div>
     </>
   );

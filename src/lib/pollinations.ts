@@ -51,6 +51,7 @@ export async function streamChat(opts: {
     model: opts.model ?? "openai",
     messages: opts.messages,
     stream: true,
+    max_tokens: 8192,
   };
   if (opts.tools && opts.tools.length) {
     body.tools = opts.tools;
